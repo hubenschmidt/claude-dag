@@ -1,0 +1,1 @@
+APPROVED: All six contract endpoints (GET /health, GET /tasks, POST /tasks, GET /tasks/{id}, PUT /tasks/{id}, DELETE /tasks/{id}) are correctly implemented with matching request/response shapes, proper status codes (200/201/204/400/404/405), input validation (title required, length limits, status enum via O(1) map lookup), and thread-safe store access.

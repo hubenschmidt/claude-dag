@@ -1,0 +1,4 @@
+REJECTED:
+1. **Missing CORS middleware** (`main.go`) — Contract requires CORS middleware allowing `Origin: *`, methods `GET/POST/PUT/DELETE`, header `Content-Type`, and automatic preflight `OPTIONS` handling. No CORS middleware exists anywhere in the codebase. Browser-based frontends will be unable to call this API.
+2. **Missing request body size limit** (`handlers.go:68, handlers.go:124`) — Contract requires wrapping `r.Body` with `http.MaxBytesReader(w, r.Body, 1<<20)` in POST and PUT handlers to cap bodies at 1 MiB. Neither handler applies this limit, allowing unbounded request bodies.
+3. **Non-deterministic task list ordering** (`store.go:51`) — Contract specifies "sorted by created_at ascending (deterministic order)" for `GET /tasks`. The `All()` method iterates over a Go map, which yields random order. Tasks must be sorted before returning.

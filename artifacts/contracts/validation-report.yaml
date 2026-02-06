@@ -1,0 +1,67 @@
+validation:
+  timestamp: "2026-02-06"
+  status: FAIL
+  summary: >
+    Backend implementation matches the data model and validation logic from contracts
+    but none of the 7 fixes specified in the backend-fix task were applied.
+    The code is the pre-fix version.
+
+  violations:
+    - id: V1
+      file: store.go
+      line: 706
+      contract: "newUUID() must return (string, error)"
+      actual: "Returns only string, discards rand.Read error with _, _ = rand.Read(b[:])"
+      severity: high
+
+    - id: V2
+      file: store.go
+      line: 650
+      contract: "Store.Create must return (Task, error) to propagate UUID failures"
+      actual: "Returns only Task"
+      severity: high
+
+    - id: V3
+      file: store.go
+      lines: "627-638"
+      contract: "Store.All must sort result by created_at ascending"
+      actual: "Returns unsorted results from map iteration"
+      severity: medium
+
+    - id: V4
+      file: handlers.go
+      lines: "440, 496"
+      contract: "POST/PUT handlers must wrap r.Body with http.MaxBytesReader(w, r.Body, 1<<20)"
+      actual: "No body size limit applied"
+      severity: medium
+
+    - id: V5
+      file: handlers.go
+      lines: "411-423, 461-483"
+      contract: "Remove method-routing closures, export individual handler functions"
+      actual: "HandleTasks and HandleTaskByID still use wrapping closures with method dispatch"
+      severity: medium
+
+    - id: V6
+      file: handlers.go
+      line: 463
+      contract: "Use r.PathValue('id') for path parameters"
+      actual: "Uses strings.TrimPrefix(r.URL.Path, '/tasks/')"
+      severity: low
+
+    - id: V7
+      file: main.go
+      lines: "550-552"
+      contract: "Use Go 1.22+ mux patterns and add CORS middleware"
+      actual: "Old-style HandleFunc registration without method patterns; no CORS middleware"
+      severity: high
+
+  conformant:
+    - "Task struct fields and JSON tags"
+    - "UpdateFields with pointer-based nil semantics"
+    - "validStatuses map for O(1) lookup"
+    - "Error response shape {error: message}"
+    - "Status enum values [todo, in_progress, done]"
+    - "Input validation (title required, length limits)"
+    - "Partial update semantics"
+    - "HTTP status codes (201, 204, 400, 404)"
