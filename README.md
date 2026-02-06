@@ -102,3 +102,4 @@ artifacts/
 The swarm uses `claude-opus-4-6` by default. The model is set in `internal/claude/client.go`.
 
 The 10-minute timeout is set in `cmd/swarm/main.go`.
+# claude-dag
