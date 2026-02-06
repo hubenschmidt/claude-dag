@@ -1,1 +1,0 @@
-APPROVED: Frontend correctly implements all required API interactions (GET/POST/PUT/DELETE /tasks) with matching request/response shapes, loading/error states, input validation per contract constraints (title 1-255, description max 4096), and status enum cycling. Script load order is correct for Babel standalone execution.

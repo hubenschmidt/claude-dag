@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/artifact"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/artifact"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 type Frontend struct{}
@@ -33,8 +33,8 @@ Before making interface decisions, check artifacts/shared-context/ for decisions
 Write your own key decisions (component interfaces, API client shapes) to artifacts/shared-context/.
 
 Write all code files to artifacts/code/frontend/ directory ONLY. Do NOT modify any file outside artifacts/.
-When completely finished, run: touch artifacts/code/frontend/.done
-Then STOP.`, task.Description, contractCtx)
+When completely finished, run: touch artifacts/code/frontend/.done.%s
+Then STOP.`, task.Description, contractCtx, task.ID)
 
 	if task.Feedback != "" {
 		prompt += fmt.Sprintf("\n\n--- PREVIOUS ATTEMPT WAS REJECTED ---\nAttempt %d/%d. Reviewer feedback:\n%s\n\nFix the issues listed above.", task.Attempts+1, model.MaxAttempts, task.Feedback)

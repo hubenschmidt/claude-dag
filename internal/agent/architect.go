@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/artifact"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/artifact"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 type Architect struct{}
@@ -28,8 +28,8 @@ func (a *Architect) Launch(session string, task *model.Task) (string, error) {
 
 Write exactly three files to artifacts/contracts/: api-contract.yaml, data-model.yaml, task-plan.yaml.
 Do NOT write code or files anywhere else — only artifacts/contracts/.
-After writing all three files, run: touch artifacts/contracts/.done
-Then STOP. Do not implement anything. Your job ends at design.`, task.Description)
+After writing all three files, run: touch artifacts/contracts/.done.%s
+Then STOP. Do not implement anything. Your job ends at design.`, task.Description, task.ID)
 
 	return launchInteractive(session, task.ID, system, prompt)
 }
@@ -61,8 +61,17 @@ Check for:
 If everything is coherent, write "APPROVED" to artifacts/reviews/architect-validate.md
 If there are issues, write "REJECTED:" followed by specific issues and which task(s) need rework to artifacts/reviews/architect-validate.md
 
-After writing, run: touch artifacts/reviews/.done
-Then STOP.`, contractCtx, codeCtx)
+After writing the review, also write a README.md to the project root (artifacts/README.md) with:
+- A one-line project description
+- Prerequisites (runtime, dependencies)
+- How to install/build
+- How to run (both backend and frontend if applicable)
+- Example usage (curl commands, URLs to visit, etc.)
+
+Keep it concise and practical — just enough for someone to clone and run.
+
+After writing both files, run: touch artifacts/reviews/.done.%s
+Then STOP.`, contractCtx, codeCtx, task.ID)
 
 	return launchInteractive(session, task.ID, system, prompt)
 }

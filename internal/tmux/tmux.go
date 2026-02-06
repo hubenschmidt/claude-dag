@@ -17,7 +17,7 @@ type PaneInfo struct {
 
 // PromptDir returns a stable temp directory for prompt files.
 func PromptDir() string {
-	dir := filepath.Join(os.TempDir(), "cathedral-swarm")
+	dir := filepath.Join(os.TempDir(), "claude-dag")
 	os.MkdirAll(dir, 0o755)
 	return dir
 }
@@ -36,6 +36,7 @@ func CreateSessionWithCmd(name, cmd string) error {
 // Dead panes auto-close so they don't clutter the layout.
 func ConfigureSession(name string) error {
 	_ = run("set-option", "-t", name, "remain-on-exit", "off")
+	_ = run("set-option", "-t", name, "history-limit", "50000")
 	return nil
 }
 

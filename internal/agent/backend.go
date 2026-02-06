@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/artifact"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/artifact"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 type Backend struct{}
@@ -33,8 +33,8 @@ Before making interface decisions, check artifacts/shared-context/ for decisions
 Write your own key decisions (endpoint signatures, data shapes) to artifacts/shared-context/.
 
 Write all code files to artifacts/code/backend/ directory ONLY. Do NOT modify go.mod, go.sum, or any file outside artifacts/.
-When completely finished, run: touch artifacts/code/backend/.done
-Then STOP.`, task.Description, contractCtx)
+When completely finished, run: touch artifacts/code/backend/.done.%s
+Then STOP.`, task.Description, contractCtx, task.ID)
 
 	if task.Feedback != "" {
 		prompt += fmt.Sprintf("\n\n--- PREVIOUS ATTEMPT WAS REJECTED ---\nAttempt %d/%d. Reviewer feedback:\n%s\n\nFix the issues listed above.", task.Attempts+1, model.MaxAttempts, task.Feedback)

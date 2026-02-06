@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/agent"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/agent"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 const (

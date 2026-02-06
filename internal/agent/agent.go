@@ -1,7 +1,7 @@
 package agent
 
 import (
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 // Agent launches a Claude Code session in a tmux pane for a given task.

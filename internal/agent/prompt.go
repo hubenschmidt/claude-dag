@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/tmux"
+	"github.com/hubenschmidt/claude-dag/internal/tmux"
 )
 
 const defaultPromptDir = "prompts"

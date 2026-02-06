@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/artifact"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/artifact"
+	"github.com/hubenschmidt/claude-dag/internal/model"
 )
 
 type Reviewer struct{}
@@ -26,10 +26,10 @@ func (r *Reviewer) Launch(session string, task *model.Task) (string, error) {
 	}
 
 	prompt := fmt.Sprintf(`Review this code and write your verdict to artifacts/reviews/%s.md ONLY. Do NOT modify any file outside artifacts/.
-When completely finished, run: touch artifacts/reviews/.done
+When completely finished, run: touch artifacts/reviews/.done.%s
 Then STOP.
 
-%s`, task.ID, codeCtx)
+%s`, task.ID, task.ID, codeCtx)
 
 	return launchInteractive(session, task.ID, system, prompt)
 }

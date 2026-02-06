@@ -1,4 +1,4 @@
-module github.com/hubenschmidt/cathedral-swarm
+module github.com/hubenschmidt/claude-dag
 
 go 1.24.0
 

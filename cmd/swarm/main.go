@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/agent"
-	"github.com/hubenschmidt/cathedral-swarm/internal/orchestrator"
-	"github.com/hubenschmidt/cathedral-swarm/internal/tmux"
+	"github.com/hubenschmidt/claude-dag/internal/agent"
+	"github.com/hubenschmidt/claude-dag/internal/orchestrator"
+	"github.com/hubenschmidt/claude-dag/internal/tmux"
 )
 
-const sessionName = "cathedral-swarm"
+const sessionName = "claude-dag"
 
 func main() {
 	goal := strings.Join(os.Args[1:], " ")
@@ -55,8 +55,8 @@ func launchInTmux(goal string) {
 	// Keep dead panes visible so user can read agent output
 	_ = tmux.ConfigureSession(sessionName)
 
-	// Attach — this replaces our process with tmux attach
-	attach := exec.Command("tmux", "attach", "-t", sessionName)
+	// Attach and immediately open the session/window tree view
+	attach := exec.Command("tmux", "attach", "-t", sessionName, ";", "choose-tree", "-w")
 	attach.Stdin = os.Stdin
 	attach.Stdout = os.Stdout
 	attach.Stderr = os.Stderr
@@ -88,7 +88,7 @@ func runOrchestrator(goal string) {
 	}()
 
 	start := time.Now()
-	log.Println("=== Cathedral Swarm ===")
+	log.Println("=== Claude DAG ===")
 	log.Printf("Goal: %s", goal)
 
 	err := orch.Run(ctx, goal)

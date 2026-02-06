@@ -11,10 +11,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/hubenschmidt/cathedral-swarm/internal/agent"
-	"github.com/hubenschmidt/cathedral-swarm/internal/artifact"
-	"github.com/hubenschmidt/cathedral-swarm/internal/model"
-	"github.com/hubenschmidt/cathedral-swarm/internal/tmux"
+	"github.com/hubenschmidt/claude-dag/internal/agent"
+	"github.com/hubenschmidt/claude-dag/internal/artifact"
+	"github.com/hubenschmidt/claude-dag/internal/model"
+	"github.com/hubenschmidt/claude-dag/internal/tmux"
 )
 
 // Roles that produce code and should be auto-reviewed.
@@ -136,16 +136,20 @@ func (o *Orchestrator) runArchitectValidation(ctx context.Context) error {
 			continue
 		}
 		_ = o.graph.RejectTask(t.ID, feedback)
+		clearSentinel(t.OutputDir, t.ID)
 		// Also reset corresponding reviewer
-		if t.ReviewTaskID != "" {
-			_ = o.graph.SetStatus(t.ReviewTaskID, model.StatusPending)
-			_ = o.graph.SetResult(t.ReviewTaskID, "")
+		if t.ReviewTaskID == "" {
+			continue
 		}
+		_ = o.graph.SetStatus(t.ReviewTaskID, model.StatusPending)
+		_ = o.graph.SetResult(t.ReviewTaskID, "")
+		clearSentinel("reviews", t.ReviewTaskID)
 	}
 
 	// Reset the validation task itself so it can re-run after fixes
 	_ = o.graph.SetStatus("architect-validate", model.StatusPending)
 	_ = o.graph.SetResult("architect-validate", "")
+	clearSentinel("reviews", "architect-validate")
 
 	// Re-enter build→review→validate loop
 	if err := o.pollLoop(ctx); err != nil {
@@ -262,6 +266,7 @@ func (o *Orchestrator) promptUserForRetry() bool {
 		t.Status = model.StatusPending
 		t.Feedback = input
 		t.Error = ""
+		clearSentinel(t.OutputDir, t.ID)
 		o.logEvent("user retry: %s", t.ID)
 
 		// Also reset corresponding reviewer if one exists
@@ -274,6 +279,7 @@ func (o *Orchestrator) promptUserForRetry() bool {
 		}
 		rev.Status = model.StatusPending
 		rev.Result = ""
+		clearSentinel("reviews", t.ReviewTaskID)
 	}
 
 	return true
@@ -287,9 +293,9 @@ func (o *Orchestrator) reapFinished() {
 			continue
 		}
 
-		// Check for .done sentinel file
+		// Check for per-task .done sentinel file
 		if t.OutputDir != "" {
-			donePath := filepath.Join(artifact.BaseDir, t.OutputDir, ".done")
+			donePath := sentinelPath(t.OutputDir, t.ID)
 			if _, err := os.Stat(donePath); err == nil {
 				_ = o.graph.SetStatus(t.ID, model.StatusCompleted)
 				o.logEvent("task %s completed (sentinel)", t.ID)
@@ -338,8 +344,10 @@ func (o *Orchestrator) processReviews() {
 		o.logEvent("review REJECTED: %s (attempt %d/%d)", t.ReviewTaskID, reviewed.Attempts+1, model.MaxAttempts)
 
 		_ = o.graph.RejectTask(t.ReviewTaskID, feedback)
+		clearSentinel(reviewed.OutputDir, t.ReviewTaskID)
 		_ = o.graph.SetStatus(t.ID, model.StatusPending)
 		_ = o.graph.SetResult(t.ID, "")
+		clearSentinel("reviews", t.ID)
 	}
 }
 
@@ -364,8 +372,8 @@ func (o *Orchestrator) hasRunning() bool {
 
 // printDAG renders the current DAG status table to stdout.
 func (o *Orchestrator) printDAG() {
-	fmt.Print("\033[2J\033[H") // clear screen
-	fmt.Println("=== Cathedral Swarm ===")
+	fmt.Println()
+	fmt.Println("=== Claude DAG ===")
 	fmt.Println()
 	fmt.Printf("%-30s %-12s %-8s %-10s\n", "Task", "Status", "Window", "Duration")
 	fmt.Println(strings.Repeat("-", 65))
@@ -395,6 +403,20 @@ func (o *Orchestrator) printDAG() {
 		}
 	}
 	fmt.Println()
+}
+
+// sentinelPath returns the per-task sentinel file path: artifacts/<dir>/.done.<taskID>
+func sentinelPath(outputDir, taskID string) string {
+	return filepath.Join(artifact.BaseDir, outputDir, ".done."+taskID)
+}
+
+// clearSentinel removes a per-task sentinel file so a re-launched task isn't
+// immediately reaped by reapFinished.
+func clearSentinel(outputDir, taskID string) {
+	if outputDir == "" {
+		return
+	}
+	os.Remove(sentinelPath(outputDir, taskID))
 }
 
 func parseVerdict(result string) string {
